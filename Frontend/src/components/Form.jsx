@@ -10,6 +10,7 @@ function Form({ setTitulo, setImgSRC, setDescripcion, agregarPost }) {
         />
       </div>
       <div className="mb-2">
+        <label>URL de la Imagen</label>
         <input
           name="img"
           onChange={(event) => setImgSRC(event.target.value)}

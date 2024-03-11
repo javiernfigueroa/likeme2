@@ -6,8 +6,8 @@ const router = express.Router();
 
 const pool = new Pool({
     host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
+    user: 'postgres',
+    password: 'Waterpol01#',
     database: process.env.DB_DATABASE,
     allowExitOnIdle: true
   });
@@ -31,7 +31,6 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
   const { titulo, img, descripcion } = req.body;
-  
 
   try {
     const result = await pool.query(
@@ -45,5 +44,39 @@ router.post('/', async (req, res) => {
     res.status(500).send('Error al agregar un nuevo post');
   }
 });
+
+router.put('/like/:id', async (req, res) => {
+  const postId = req.params.id;
+
+  try {
+      const result = await pool.query(
+          'UPDATE posts SET likes = COALESCE(likes, 0) + 1 WHERE id = $1 RETURNING *',
+          [postId]
+      );
+
+      res.json(result.rows[0]);
+  } catch (error) {
+      console.error(error);
+      res.status(500).send('Error al actualizar los likes');
+  }
+});
+
+router.delete('/:id', async (req, res) => {
+  const postId = req.params.id;
+
+  try {
+      const result = await pool.query('DELETE FROM posts WHERE id = $1 RETURNING *', [postId]);
+
+      if (result.rows.length === 0) {
+          res.status(404).send('Post no encontrado');
+      } else {
+          res.json(result.rows[0]);
+      }
+  } catch (error) {
+      console.error(error);
+      res.status(500).send('Error al eliminar el post');
+  }
+});
+
 
 module.exports = router;
